@@ -1,3 +1,8 @@
+
+📝 **Note:**  
+This is my first time recording and explaining a demo.  
+Please excuse any issues in the flow or clarity.  
+If needed, I’m happy to re-record and submit a better version.
 # 📦 Workforce Management API - Submission
 
 ## ✅ 1. GitHub Repository (Project Code)
