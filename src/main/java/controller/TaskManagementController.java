@@ -67,4 +67,9 @@ public class TaskManagementController {
    public Response<TaskManagementDto> getTaskById(@PathVariable Long id) {
        return new Response<>(taskManagementService.findTaskById(id));
    }
+   @GetMapping("/tasks")
+public Response<List<TaskManagementDto>> getAllTasks() {
+    return new Response<>(taskManagementService.getAllTasks());
+}
+
 }

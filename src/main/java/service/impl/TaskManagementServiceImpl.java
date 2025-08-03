@@ -112,30 +112,45 @@ public List<TaskManagementDto> updateTasks(UpdateTaskRequest updateRequest) {
        List<TaskManagement> existingTasks = taskRepository.findByReferenceIdAndReferenceType(request.getReferenceId(), request.getReferenceType());
 
        for (Task taskType : applicableTasks) {
+           // Find all existing tasks of this type (including completed ones for proper cancellation)
            List<TaskManagement> tasksOfType = existingTasks.stream()
-                   .filter(t -> t.getTask() == taskType && t.getStatus() != TaskStatus.COMPLETED)
+                   .filter(t -> t.getTask() == taskType)
                    .collect(Collectors.toList());
 
            if (!tasksOfType.isEmpty()) {
-               // Assign the first task
-               TaskManagement firstTask = tasksOfType.get(0);
-               firstTask.setAssigneeId(request.getAssigneeId());
-               firstTask.setStatus(TaskStatus.ASSIGNED);
-               firstTask.setCreatedAt(LocalDateTime.now());
-               addActivity(firstTask, "ASSIGNED", "Task assigned to user " + request.getAssigneeId(), request.getAssigneeId());
-               taskRepository.save(firstTask);
+               // Find the first non-completed task to reassign, or use the first one if all are completed
+               TaskManagement taskToReassign = tasksOfType.stream()
+                   .filter(t -> t.getStatus() != TaskStatus.COMPLETED)
+                   .findFirst()
+                   .orElse(tasksOfType.get(0));
 
-               // Cancel the rest
-               for (int i = 1; i < tasksOfType.size(); i++) {
-                   TaskManagement cancelledTask = tasksOfType.get(i);
-                   cancelledTask.setStatus(TaskStatus.CANCELLED);
-                   cancelledTask.setAssigneeId(null);
-                   addActivity(cancelledTask, "CANCELLED", "Task cancelled due to reassignment", request.getAssigneeId());
-                   taskRepository.save(cancelledTask);
+               // If the task is not completed, reassign it
+               if (taskToReassign.getStatus() != TaskStatus.COMPLETED) {
+                   Long oldAssigneeId = taskToReassign.getAssigneeId();
+                   taskToReassign.setAssigneeId(request.getAssigneeId());
+                   taskToReassign.setStatus(TaskStatus.ASSIGNED);
+                   taskToReassign.setCreatedAt(LocalDateTime.now());
+                   
+                   String activityDescription = oldAssigneeId != null && !oldAssigneeId.equals(request.getAssigneeId()) 
+                       ? "Task reassigned from user " + oldAssigneeId + " to user " + request.getAssigneeId()
+                       : "Task assigned to user " + request.getAssigneeId();
+                   
+                   addActivity(taskToReassign, "ASSIGNED", activityDescription, request.getAssigneeId());
+                   taskRepository.save(taskToReassign);
+               }
+
+               // Cancel ALL other tasks of this type (including completed ones to prevent duplicates)
+               for (TaskManagement existingTask : tasksOfType) {
+                   if (!existingTask.getId().equals(taskToReassign.getId()) && existingTask.getStatus() != TaskStatus.CANCELLED) {
+                       existingTask.setStatus(TaskStatus.CANCELLED);
+                       existingTask.setAssigneeId(null);
+                       addActivity(existingTask, "CANCELLED", "Task cancelled due to reassignment", request.getAssigneeId());
+                       taskRepository.save(existingTask);
+                   }
                }
 
            } else {
-               // create a new task if no existing tasks are found
+               // Create a new task if no existing tasks are found
                TaskManagement newTask = new TaskManagement();
                newTask.setReferenceId(request.getReferenceId());
                newTask.setReferenceType(request.getReferenceType());
@@ -276,4 +291,10 @@ public List<TaskManagementDto> updateTasks(UpdateTaskRequest updateRequest) {
        
        task.getActivities().add(activity);
    }
+   @Override
+public List<TaskManagementDto> getAllTasks() {
+    List<TaskManagement> allTasks = taskRepository.findAll();
+    return taskMapper.modelListToDtoList(allTasks);
+}
+
 }

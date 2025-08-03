@@ -18,4 +18,6 @@ public interface TaskManagementService {
    
    // New comment method
    TaskManagementDto addComment(Long taskId, AddCommentRequest request);
+   List<TaskManagementDto> getAllTasks();
+
 }
