@@ -1,107 +1,66 @@
-/*
-# Workforce Management - Starter Project
+# 📦 Workforce Management API - Submission
 
+## ✅ 1. GitHub Repository (Project Code)
 
-This is a Spring Boot application for the Backend Engineer take-home assignment.
+🔗 **Repository Link:**  
+[https://github.com/sudhakarkatam/railse_assignment](https://github.com/sudhakarkatam/railse_assignment)
 
+> This repository contains the full source code for the Workforce Management Backend Engineer assignment.  
+> It includes the starter code, all bug fixes, and newly implemented features as listed in the challenge.
 
-## How to Run
+---
 
+## 🎥 2. Video Demonstration
 
-1.  Ensure you have Java 17 and Gradle installed.
-2.  Open the project in your favorite IDE (IntelliJ, VSCode, etc.).
-3.  Run the main class `com.railse.hiring.workforcemgmt.Application`.
-4.  The application will start on `http://localhost:8080`.
+🔗 **Demo Link (Google Drive):**  
+[https://drive.google.com/file/d/1RkeXRTvEW_SYH3-Y7W1tRsJfoK-BW37y/view?usp=sharing](https://drive.google.com/file/d/1RkeXRTvEW_SYH3-Y7W1tRsJfoK-BW37y/view?usp=sharing)
 
+> The video walks through:
+> - How to run the application
+> - Bug fixes for `assign-by-ref` and `fetch-by-date/v2`
+> - Implementation and demonstration of all 3 major features
 
-## API Endpoints
+---
 
+## 🛠️ Features Implemented
 
-Here are some example `cURL` commands to interact with the API.
+### ✅ Bug Fixes
 
+- **Bug #1:** `assign-by-ref` now correctly reassigns only the latest open task and cancels the rest.
+- **Bug #2:** `fetch-by-date/v2` now filters out cancelled tasks and respects the given date range.
 
-### Get a single task
-```bash
-curl --location 'http://localhost:8080/task-mgmt/1'
-```
+---
 
+### 🚀 New Features
 
-### Create a new task
-```bash
-curl --location 'http://localhost:8080/task-mgmt/create' \
---header 'Content-Type: application/json' \
---data '{
-   "requests": [
-       {
-           "reference_id": 105,
-           "reference_type": "ORDER",
-           "task": "CREATE_INVOICE",
-           "assignee_id": 1,
-           "priority": "HIGH",
-           "task_deadline_time": 1728192000000
-       }
-   ]
-}'
-```
+#### 1. Smart Daily Task View
+- Enhanced `/fetch-by-date/v2` to:
+  - Include all active tasks created **within** the selected date range.
+  - Also include tasks created **before** the range but still active (not completed or cancelled).
 
+#### 2. Task Priority Management
+- Added a `priority` field to the task model (`HIGH`, `MEDIUM`, `LOW`).
+- New endpoint to **update task priority**.
+- New endpoint to **fetch tasks by priority**, e.g., `/tasks/priority/HIGH`.
 
-### Update a task's status
-```bash
-curl --location 'http://localhost:8080/task-mgmt/update' \
---header 'Content-Type: application/json' \
---data '{
-   "requests": [
-       {
-           "task_id": 1,
-           "task_status": "STARTED",
-           "description": "Work has been started on this invoice."
-       }
-   ]
-}'
-```
+#### 3. Task Comments & Activity History
+- Introduced **activity logging** for task events (creation, status updates, priority changes, etc.).
+- Added support for **user comments** on tasks.
+- Fetching task details now returns:
+  - Full **activity history**
+  - All **user comments**  
+  *(Sorted by timestamp for clarity)*
 
+---
 
-### Assign tasks by reference (Bug #1 is here)
-This assigns all tasks for `reference_id: 201` to `assignee_id: 5`.
-```bash
-curl --location 'http://localhost:8080/task-mgmt/assign-by-ref' \
---header 'Content-Type: application/json' \
---data '{
-   "reference_id": 201,
-   "reference_type": "ENTITY",
-   "assignee_id": 5
-}'
-```
+## 🧪 How to Test
 
+1. Clone the repository.
+2. Ensure Java 17 and Gradle are installed.
+3. Run the main class: `com.railse.hiring.workforcemgmt.Application`
+4. Use the provided cURL commands or Postman to test endpoints.
 
-### Fetch tasks by date (Bug #2 is here)
-This fetches tasks for assignees 1 and 2. It incorrectly includes cancelled tasks.
-```bash
-curl --location 'http://localhost:8080/task-mgmt/fetch-by-date/v2' \
---header 'Content-Type: application/json' \
---data '{
-   "start_date": 1672531200000,
-   "end_date": 1735689599000,
-   "assignee_ids": [1, 2]
-}'
-```
-*/
+---
 
-
-
-
-// =====================================================================================
-// FILE: SUBMISSION.md
-// =====================================================================================
-/*
-# Submission
-
-
-### 1. Link to your Git Repository Branch
-[Your Git Branch URL Here]
-
-
-### 2. Link to your Video Demonstration
-(Please ensure the link is publicly accessible)
-[Your Google Drive, Loom, or YouTube Link Here]
-*/
+📩 Feel free to reach out for any clarifications or walkthroughs.  
+Thank you for reviewing the submission!
